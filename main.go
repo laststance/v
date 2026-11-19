@@ -23,6 +23,7 @@ Press Ctrl+G, release it, then press one key:
   - / +             Narrow / widen the focused pane
   x                 Close the focused pane
   Ctrl+G            Send a literal Ctrl+G to the shell
+  Esc               Cancel
 
 You can also type exit in a shell. Closing the last pane returns to your prompt.
 In Terminal.app, Option-drag selects a rectangle for Command+C. Command+V pastes.
