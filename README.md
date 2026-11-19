@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/v.jpg" alt="v logo" width="400">
+</p>
+
 # v
 
 Run `v` at a shell prompt to open two independent shells side by side in the current terminal tab. Both start in the current directory using `$SHELL`. Closing the last pane returns to the original prompt.
