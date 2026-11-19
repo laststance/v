@@ -14,7 +14,7 @@ Run `v` from the directory you want both shells to open in. If your shell cannot
 
 ## Controls
 
-Press **Ctrl+G**, release it, then press one key. While the terminal is split, the bottom row shows the controls and the focused pane number. When one pane remains, its shell uses the full height. Press **Ctrl+G**, then `s`, to split it again.
+Press **Ctrl+G**, release it, then press one key. While the terminal is split, the bottom-left corner shows the focused pane number and `^G for keys`. After **Ctrl+G**, it lists the keys you can press next. When one pane remains, its shell uses the full height. Press **Ctrl+G**, then `s`, to split it again.
 
 | Key | Action |
 | --- | --- |
@@ -24,6 +24,7 @@ Press **Ctrl+G**, release it, then press one key. While the terminal is split, t
 | `-` or `+` | Narrow or widen the focused pane by up to four columns |
 | `x` | Close the focused pane and hang up its running job |
 | Ctrl+G | Send a literal Ctrl+G to the focused shell |
+| Esc | Cancel without doing anything |
 
 Typing `exit` in a shell also closes its pane. Other panes keep running.
 
