@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode"
 
 	"github.com/charmbracelet/x/ansi"
 )
@@ -76,8 +77,16 @@ func (m *mux) controls() [][]span {
 		for _, g := range groups {
 			room -= spanWidth(g)
 		}
+		// Drop control characters: an error can quote a path a shell reported through OSC 7,
+		// and its escape sequences must never reach the real terminal.
+		visible := strings.Map(func(r rune) rune {
+			if unicode.IsControl(r) {
+				return -1
+			}
+			return r
+		}, m.message)
 		// A window too narrow for any of the message keeps just the pane number, not a bare separator.
-		if message := ansi.Truncate(m.message, max(0, room), ""); message != "" {
+		if message := ansi.Truncate(visible, max(0, room), ""); message != "" {
 			groups = append(groups, withLead(span{message, style.message}))
 		}
 	case m.awaiting:

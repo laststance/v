@@ -353,3 +353,32 @@ func TestOnlyDividersWithABlankCellAfterTheFooterReachTheBottomRow(t *testing.T)
 		})
 	}
 }
+
+// Value: protects=no message text can send control bytes to the real terminal through the controls row;
+// fails_when=controls() passes message bytes through unfiltered; why_new=the control-character guard has no other test;
+// seam=none; no_claim=no current message source carries shell-written text (split errors read "fork/exec /bin/sh: ...")
+func TestControlsRowNeverPassesControlCharactersFromAMessage(t *testing.T) {
+	// Arrange
+	left := &pane{screen: vt.NewEmulator(40, 3), visible: true}
+	right := &pane{screen: vt.NewEmulator(40, 3), visible: true, offset: 41}
+	m := &mux{columns: 81, rows: 4, panes: []*pane{left, right}}
+	m.message = "chdir /tmp/\x1b[2Jx: no such file or directory"
+	var output bytes.Buffer
+
+	// Act
+	if err := m.draw(&output); err != nil {
+		t.Fatal(err)
+	}
+
+	// Assert
+	if bytes.Contains(output.Bytes(), []byte("\x1b[2J")) {
+		t.Fatalf("frame passes the message's clear-screen sequence to the terminal: %q", output.String())
+	}
+	outer := vt.NewEmulator(81, 4)
+	defer outer.Close()
+	outer.Write(output.Bytes())
+	want := " 1/2 · chdir /tmp/[2Jx: no such file or directory"
+	if got := strings.TrimRight(strings.Split(outer.String(), "\n")[3], " "); got != want {
+		t.Errorf("bottom row displays %q, want %q", got, want)
+	}
+}
