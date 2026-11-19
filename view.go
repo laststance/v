@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"unicode/utf8"
+
+	"github.com/charmbracelet/x/ansi"
 )
 
 // palette holds the SGR parameters of v's own chrome: the pane divider and the controls row.
@@ -35,12 +36,12 @@ var quietPalette = palette{
 // span is a run of controls-row text drawn in one SGR style.
 type span struct{ text, style string }
 
-// spanWidth counts the cells a group occupies. Every character in the controls row is one cell wide,
-// including ← → · ›, which Terminal.app draws narrow unless its ambiguous-width option is on.
+// spanWidth counts the terminal cells a group occupies, so a wide character in a message counts twice.
+// ← → · › count as one cell, which matches Terminal.app unless its ambiguous-width option is on.
 func spanWidth(group []span) int {
 	n := 0
 	for _, s := range group {
-		n += utf8.RuneCountInString(s.text)
+		n += ansi.StringWidth(s.text)
 	}
 	return n
 }
@@ -71,12 +72,14 @@ func (m *mux) controls() [][]span {
 	switch {
 	case m.message != "":
 		// Shorten a long message instead of dropping it, so the row still says what happened.
-		message := []rune(m.message)
-		room := m.columns - 1 - utf8.RuneCountInString(lead)
+		room := m.columns - 1 - ansi.StringWidth(lead)
 		for _, g := range groups {
 			room -= spanWidth(g)
 		}
-		groups = append(groups, withLead(span{string(message[:max(0, min(len(message), room))]), style.message}))
+		// A window too narrow for any of the message keeps just the pane number, not a bare separator.
+		if message := ansi.Truncate(m.message, max(0, room), ""); message != "" {
+			groups = append(groups, withLead(span{message, style.message}))
+		}
 	case m.awaiting:
 		bindings := [][2]string{{"←/→", "focus"}, {"s", "split"}, {"-/+", "width"}, {"x", "close"}, {"esc", "cancel"}}
 		if !split {
