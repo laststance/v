@@ -77,8 +77,8 @@ func (m *mux) controls() [][]span {
 		for _, g := range groups {
 			room -= spanWidth(g)
 		}
-		// Drop control characters: an error can quote a path a shell reported through OSC 7,
-		// and its escape sequences must never reach the real terminal.
+		// Drop control characters so no message text, whatever its source, can move the cursor
+		// or clear the real terminal. No current message quotes shell output; this keeps it that way.
 		visible := strings.Map(func(r rune) rune {
 			if unicode.IsControl(r) {
 				return -1
